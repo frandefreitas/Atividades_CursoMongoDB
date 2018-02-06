@@ -1,0 +1,9 @@
+1) entra no arquivo, "mongo", depois "mongod" para iniciar o servidor, depois retorna a clicar em "mongo".
+2) manter o arquivo "mongod" aberto durante as atividades para o servidor ficar aberto.
+3) o "mongo" comum é o client.
+4) clica no comando "show dbs" para mostra a funcionalidade que apresentar dois banco de dados o admin e o local e a quantidade utilizada deles.
+5) para configurar para não precisar fazer isso toda hora, clica com botão direito em "Este computador", depois em "Propriedades".
+6) Depois em "Configurações Avançadas", "Variaveis de ambiente".
+7) Agora vai na pasta do "mongo" e "mongod" e copia o caminho.
+8) Clica em "Path" e coloca em "Novo" e cola o "C:\mongodb\bin".
+9) Tem como mover para cima ou para baixo de acordo com a importância.

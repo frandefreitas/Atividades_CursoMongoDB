@@ -1,0 +1,586 @@
+> show dbs                                              //tu apresenta
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> use test_mongo                                    //cria a base e ja entra nela, depois inseri por isso fica vazio
+switched to db test_mongo
+> show dbs                                    
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> db.movie.insert({'name'='The last'});               //criando a collection de movie onde o atributo name já tem registro the last. 
+WriteResult({ "nInserted" : 1 })                          //apresenta resultado
+> show dbs
+admin       0.000GB
+config      0.000GB
+local       0.000GB
+test_mongo  0.000GB                                    //agora já com dados inseridos na base apresenta resposta
+>use local                                                     //entrou na base local já existente
+switched to db local
+> show collections                                       //seleciona as collections do db local(equivale aparentemente a tabelas do SQL)                           
+startup_log                                                   //só tem a startup_log
+> use test_mongo                                        //volta para test_mongo
+switched to db test_mongo
+> show movie
+2018-02-06T03:03:16.020-0200 E QUERY    [thread1] Error: don't know how to show [movie] :     //erro
+shellHelper.show@src/mongo/shell/utils.js:950:11
+shellHelper@src/mongo/shell/utils.js:703:15
+@(shellhelp2):1:1
+> show collections                                          //lista as collections da test_mongo
+movie
+
+> db.dropDatabase()
+{ "dropped" : "test_mongo", "ok" : 1 }             //excluir a database
+
+> show dbs                                                    //se listar as bases de dados, ja não aparece mais a test_mongo
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+
+//tem familiaridade com js até por ter sido feita por ela
+
+> use test-Mongo
+switched to db test-Mongo
+> db.movie.insert({'name':'The last'})
+WriteResult({ "nInserted" : 1 })
+> show dbs
+admin       0.000GB
+config      0.000GB
+local       0.000GB
+test-Mongo  0.000GB
+> use test-Mongo
+switched to db test-Mongo
+> dp.movie.drop()
+2018-02-06T03:11:12.570-0200 E QUERY    [thread1] ReferenceError: dp is not defined :
+@(shell):1:1
+> db.movie.drop()                                  //excluiu a collection
+true
+> show collections                                 //listar as collections
+>                                                          //apresenta nada e ja solicita próximo comando
+
+
+
+$type seleciona todos os tipos e returna o valor em uma query
+se eu quero armazenar um string tem que enviar um string
+mas pode realizar a checagem pelo mongo validator
+
+
+
+exemplo de validator
+db.createCollection( "contacts",
+   { validator: { $or:                                                               //lembrar das portas or, tem que está em um deles quando for criado
+      [
+         { phone: { $type: "string" } },                                        //tipo tem que ser string
+         { email: { $regex: /@mongodb\.com$/ } },                    //expressão regular
+         { status: { $in: [ "Unknown", "Incomplete" ] } }                //ver se também as informações que necessitar resolver
+      ]
+   }
+} )
+
+
+
+
+> db.createCollection('products', 
+        {validator: {$or: 
+            [
+               {name: {$type:'string'} }
+            ]
+        }
+    } )                  
+{ "ok" : 1 }
+
+
+> db.products.find()                //não tem registro nenhum ainda a coluna products
+> db.products.insert({name: 'Teste 1'});                 //uma espécie de insert into
+WriteResult({ "nInserted" : 1 })                               //uma espécie de sucess
+
+
+> db.products.insert({name: 21212});
+WriteResult({                            //erro porque na validação disse que a coluna name era para ser do tipo string
+        "nInserted" : 0,
+        "writeError" : {
+                "code" : 121,
+                "errmsg" : "Document failed validation"
+        }
+})
+
+
+
+> db.products.insert({name: '21212'});         //com aspas já é string
+WriteResult({ "nInserted" : 1 })
+
+
+
+//no insert caso não exista a coleção quando é feito o documento é criada automaticamente
+
+
+
+
+
+
+
+
+
+
+
+//aula insert
+> use test_manga
+switched to db test_manga
+//movies 
+- id
+- name
+- author
+- date
+> db.insert({})    //propriedade json, id não precisa criar o mongo db já faz
+> db.movies.insert({name: 'Movie 1', author:'Author 1', date: new Date()})    
+//função que manda db.nome_collection.crud_escolhido({nome_coluna1: 'registro_coluna1', nome_coluna2:'registro_coluna2', nome_coluna3: Data_atual()}) 
+WriteResult({ "nInserted" : 1 }) 
+
+> db.movies.find()           //select para testa se a função anterior deu certo, select * from tabela(collection) movies
+{ "_id" : ObjectId("5a795436d454302f0cbdad46"), "name" : "Movie 1", "author" : "Author 1", "date" : ISODate("2018-02-06T07:07:34.322Z") }
+
+> db.movies.find({})             //outra maneira de fazer
+{ "_id" : ObjectId("5a795436d454302f0cbdad46"), "name" : "Movie 1", "author" : "Author 1", "date" : ISODate("2018-02-06T07:07:34.322Z") }
+
+> db.movies.insertOne({name:'Movie2', author:'Author1', date: new Date()})           
+//o insertOne retorna a inserção que ele acabou de inserir
+{
+        "acknowledged" : true,
+        "insertedId" : ObjectId("5a7955f3d454302f0cbdad47")
+}
+
+
+
+
+> db.movies.insertMany([{name:'Movie8', author:'Author8', date: new Date()}, {name:'Movie9', author:'Author9', date: new Date()}])    
+//o insertMany ele cria um array, seria um book create, varios onde seria criado varios componentes dentro de um array, mostra os ids criados na coleção de movies
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("5a79576cd454302f0cbdad49"),
+                ObjectId("5a79576cd454302f0cbdad4a")
+        ]
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
+//aula querying
+//find tem varias propriedades de filtrar os registros
+> db.movies.find({})                      //seleciona tudo que está na collection(tabela) movies
+{ "_id" : ObjectId("5a795436d454302f0cbdad46"), "name" : "Movie 1", "author" : "Author 1", "date" : ISODate("2018-02-06T07:07:34.322Z") }
+{ "_id" : ObjectId("5a7955f3d454302f0cbdad47"), "name" : "Movie2", "author" : "Author1", "date" : ISODate("2018-02-06T07:14:59.646Z") }
+{ "_id" : ObjectId("5a79568ad454302f0cbdad48"), "name" : "Movie2", "author" : "Author1", "date" : ISODate("2018-02-06T07:17:30.244Z") }
+{ "_id" : ObjectId("5a79576cd454302f0cbdad49"), "name" : "Movie8", "author" : "Author8", "date" : ISODate("2018-02-06T07:21:16.291Z") }
+{ "_id" : ObjectId("5a79576cd454302f0cbdad4a"), "name" : "Movie9", "author" : "Author9", "date" : ISODate("2018-02-06T07:21:16.291Z") }
+> db.movies.find({name: 'Movie2'})    //seleciona todos os documentos que tenham name "Movie2"
+{ "_id" : ObjectId("5a7955f3d454302f0cbdad47"), "name" : "Movie2", "author" : "Author1", "date" : ISODate("2018-02-06T07:14:59.646Z") }
+{ "_id" : ObjectId("5a79568ad454302f0cbdad48"), "name" : "Movie2", "author" : "Author1", "date" : ISODate("2018-02-06T07:17:30.244Z") }
+
+
+
+//elementos são registro
+
+db.getCollection('users').find({      //select * from users where status: 'A' and age<30;
+    status: 'A',
+    age: {
+        $lt:30                    //less than (menos do que)
+        }
+    })
+
+
+db.getCollection('users').find({      //select * from users where status: 'A' and age>30;
+    status: 'A',
+    age: {
+        $gt:30                    //greater than (maior do que)
+        }
+    })
+
+
+db.getCollection('users').find({      //select * from users where status: 'A' or age<30;
+    $or: [                            //ele é um ARRAY para ou
+    {status: 'A' },                     
+        {age: {
+            $lt:30                    //less than (menos do que)
+            } }                    
+        ] 
+    })
+
+
+db.getCollection('users').find({      //selecionar todos que tenham artista favorito igual a Picasso
+    
+        'favorites.artist':'Picasso'               //quando é um objeto com dois fields(campos) colunas, coloca-se 'objeto.coluna' = 'parametro de pesquisa'
+      
+    })
+
+
+db.getCollection('users').find({      //selecionar dentro de um array
+     badges : 'black'                     //selecionar de array
+    })
+
+
+db.getCollection('users').find({      //selecionar dentro de um array
+     badges : ['black', 'blue']       //quando se tem mais de uma condição no array
+    })
+
+
+db.getCollection('users').find({      //pode ter array e object
+     badges : ['black', 'blue'], 
+     'favorites.artist':'Picasso'
+    })
+
+
+db.getCollection('users').find({      //testa se existe artist
+     'favorites.artist':{             //cuidar os :
+         $exists: true                //esse não tem [] porque não é array
+         }
+    })
+
+
+db.getCollection('users').find({      //testa se tem campos vazios artist
+     'favorites.artist':{             //cuidar os :
+         $exists: false               //esse não tem [] porque não é array
+         }
+    })
+
+
+db.getCollection('users').find({      
+    //testa se tem campos vazios artist, limitando os campos 1 se quer que apareça, 0 não quer que apareça
+     'favorites.artist':{             //cuidar os :
+         $exists: true               //esse não tem [] porque não é array
+         }
+    },{_id:1 , name:1})              
+    //se colocar só 1, o vai deduzir o resto tudo é zero e vice-versa
+
+
+db.getCollection('users').findOne({      //mostra apenas o primeiro registro
+    //testa se tem campos vazios artist, limitando os campos 1 se quer que apareça, 0 não quer que apareça
+     'favorites.artist':{             //cuidar os :
+         $exists: true               //esse não tem [] porque não é array
+         }
+    },{_id:1 , name:1})              
+    //se colocar só 1, o vai deduzir o resto tudo é zero e vice-versa
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//aula update
+
+db.getCollection('users').update({               //porem apagou os registro que não são id, name e age, por isso não é necessário o comando do set
+    _id: 2.0,                 //antes das chaves vai os parametros que querem modificar (where)
+    name: 'bob'},{
+    name: 'ted',              //depois das chaves é feita as modificações
+        age: 32.0
+    })   
+
+
+   
+db.getCollection('users').update({         
+    _id: 2.0,                 //antes das chaves vai os parametros que querem modificar (where)
+    name: 'ted'
+},{
+    $set:{                          //a maneira correta é essa com o set { mudanças }
+    name: 'ted123',              //depois das chaves é feita as modificações 
+        age: 32.0
+        }
+    })   
+
+   
+db.getCollection('users').update({         
+    _id: 3.0,               
+    name: 'ahn'
+},{
+    $set:{                                    //o set então mantem a estrutura
+    name: 'alvin',              
+        age: 23.0
+        }
+    })   
+
+
+
+db.getCollection('users').update({     //ele vai seta uma idade comum a todos os documentos
+    age: {                  
+        $gt:19 
+    }
+},{
+    $set:{
+        age: 26.0
+        }
+},{
+    multi: true                       
+//o terceiro parametro terá uma propriedade chamada multi, ou seja, ele fará que não importante a qtde de match que ele deu percorrerá todo os documentos
+    })   
+
+
+  
+db.getCollection('users').update({     
+    _id: 2.0
+},{
+    $unset:{                           //responsável por remover campos especificos do documento
+        age: 0
+        }
+  })   
+
+
+db.getCollection('users').update({     
+    _id: 3.0
+},{
+    $rename:{                           //responsável por mudar o nome do seus atributos dentro de seu documento
+        'name': 'nickname'
+        }
+  })   
+
+
+db.getCollection('users').updateOne({     //basicamente mesma coisa do update
+    _id: 2.0
+},{
+    $set:{                           //responsável por mudar o nome do seus atributos dentro de seu documento
+        nickname: 'Madalena'
+        }
+  })   
+   
+   
+
+db.getCollection('users').replaceOne({     
+   //basicamente mesma coisa do update, só que mesmo com uma lista cheia de busca ele vai pegar o primeiro elemento e atualizar
+    _id: 2.0
+},{
+        nickname: 'Helena'      //a estrutura do replaceOne não necessita ter o set
+  })         //ele retorna que tudo foi realizado corretamente
+
+db.getCollection('users').updateMany({     
+//ele vai busca uma lista de registro baseado no critério de busca e setar toda lista de registro
+    age: {
+        $gte: 26                 //gte é maior ou igual a 26
+    }
+},{
+    $set:{                          
+        nickname: 'Macarena'
+        }
+  })   
+   
+
+
+
+db.getCollection('users').updateMany({     
+//ele vai busca uma lista de registro baseado no critério de busca e setar toda lista de registro
+    age: {
+        $gte: 26                 //gte é maior ou igual a 26
+    }
+},{
+    $set:{                          
+         age: 27               
+    }
+})   
+
+
+
+
+
+
+
+
+
+
+
+
+//aula delete
+//remove generalista, deleteOne remove apenas um, deleteMany remove uma lista de acordo com o critério de busca
+
+db.getCollection('users').remove({      //removendo os registro do id 2.0, como fosse no sql delete from users where _id = 2
+     _id:2.0
+    })    
+
+
+db.getCollection('users').deleteOne({      //removendo apenas algum objeto que a criteria do busca estara correspondendo
+     _id: 3.0
+    })
+
+
+db.getCollection('users').deleteMany({      //removendo uma lista de acordo com o critério
+     age: 28.0
+    })    
+        
+
+db.getCollection('users').remove({})          //é um removeAll, zera tudo
+          
+ 
+
+
+
+
+
+
+
+
+
+//aula relações entre documentos
+1:1 (onde o autor 1, possui book 1)
+//nesse caso incorpora objetos
+db.getCollection('books').insert({ 
+    title: 'Book 1', 
+    date: new Date(), 
+    author:{name:'André', 
+        age:48, 
+        books: 2} 
+    })
+
+
+1:n (onde um book possui 3 autores)
+//nesse caso incorpora array
+    db.getCollection('books').insert({ 
+    title: 'Book 7', 
+    date: new Date(), 
+    author:[{name:'Luiza', 
+        age:48, 
+        books: 4} ,
+        {name:'Iara', 
+        age:48, 
+        books: 1} ,
+        {name:'Monique', 
+        age:48, 
+        books: 2} 
+    ]})
+
+
+
+db.getCollection('books').insert({
+    name: 'Book 4',
+    date: new Date(),
+    author: {
+        $ref: 'authors',     //está referenciando com a tabela authors
+        $id: ObjectId("5a798526c857cd0d858caf56")       
+        //e ligando o id do Bebeto da tabela authors ao Book4 dessa tabela 
+        }
+    })
+
+
+
+db.getCollection('books').insert({
+    name: 'Book 4',
+    date: new Date(),
+    author: {
+        $ref: 'authors',     //está referenciando com a tabela authors
+        $id: [ObjectId("5a798526c857cd0d858caf56"),
+              ObjectId("5a79852fc857cd0d858caf57")         
+        //criando array para caso tenha mais de um author 
+        //e ligando o id do Bebeto e Romario da tabela authors ao Book4 dessa tabela 
+        ]}
+    })
+
+
+
+
+
+
+
+
+
+
+
+//aula agregações
+db.getCollection('books').count({})                    //mesmo count do mysql
+
+
+db.getCollection('books').aggregate([{   //é um array que envia os dois registros, reduzindo informações através da query
+    $group:{                           //$group recebe o nome do autor e agrupa
+        _id:'$author',                 //o primeiro sempre tem que ser o _id que recebe o $author ele é o indice
+    total:{
+        $sum:1                         //ele vai somar, cada curso vale 1, se por sum:2, por exemplo, vai dobrar
+        }
+      }
+    }])
+
+
+db.getCollection('books').update({   
+author: 'School of Net'},{
+    $set:{
+     like:150   
+        }
+    }, {multi: true})
+
+
+db.getCollection('books').update({   
+author: 'Cod Education'},{
+    $set:{
+     like:130   
+        }
+    }, {multi: true})
+
+
+db.getCollection('books').aggregate([{   //é um array que envia os dois registros, reduzindo informações através da query
+    $group:{                           //$group recebe o nome do autor e agrupa
+        _id:'$author',                 //o primeiro sempre tem que ser o _id que recebe o $author ele é o indice
+    total:{
+        $sum:'$like'                        //ele vai somar os likes ao inves de numero pré-estabelecido.
+        }
+      }
+    }])
+
+
+
+db.getCollection('books').update({  
+                       
+        _id:ObjectId("5a798ad0c857cd0d858caf5d")
+    },{        //id recebe esse object id como where
+    $set:{
+        like:200                        
+        }
+        },{
+     multi:true })
+    
+    
+
+db.getCollection('books').aggregate([{   //é um array que envia os dois registros, reduzindo informações através da query
+    $group:{                           //$group recebe o nome do autor e agrupa
+        _id:'$author',                 //o primeiro sempre tem que ser o _id que recebe o $author ele é o indice
+    total:{
+        $min:'$like'                        //ele vai enviar o menor valor de cada author.
+        }
+      }
+    }])
+
+
+
+db.getCollection('books').aggregate([{   //é um array que envia os dois registros, reduzindo informações através da query
+    $group:{                           //$group recebe o nome do autor e agrupa
+        _id:'$author',                 //o primeiro sempre tem que ser o _id que recebe o $author ele é o indice
+    total_max:{
+        $max:'$like'                        //ele vai enviar o maior valor de cada author.
+        }
+      }
+    }])
+
+
+
+db.getCollection('books').aggregate([{   //é um array que envia os dois registros, reduzindo informações através da query
+    $group:{                           //$group recebe o nome do autor e agrupa
+        _id:'$author',                 //o primeiro sempre tem que ser o _id que recebe o $author ele é o indice
+    media:{
+        $avg:'$like'                        //ele vai enviar a media dos authores agrupados por registro.
+        }
+      }
+    }])
+
+
+
